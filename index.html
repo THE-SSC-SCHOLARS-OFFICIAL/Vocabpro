@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE SSC SCHOLARS OFFICIAL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --neon: #FFD700; --bg: #050505; --card: #0f0f0f; --fg: #ffffff; --border: rgba(255,215,0,0.2); --err: #ff0033; --succ: #00ff66; --info: #00ccff; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Inter', sans-serif; border-radius:0!important; }
+        body { background:var(--bg); color:var(--fg); overflow-x:hidden; }
+        
+        /* HEADER */
+        .cyber-header { padding: 15px; border-bottom: 2px solid var(--neon); text-align: center; box-shadow: 0 0 15px var(--neon); position: sticky; top:0; z-index:100; background: #000; }
+        .cyber-header h1 { font-family: 'Orbitron'; color: var(--neon); font-size: 1.1rem; text-transform: uppercase; }
+        #app { max-width: 900px; margin: 0 auto; padding: 15px; }
+        
+        /* SCREENS */
+        .screen { display:none; } .active { display:block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+        
+        /* MENUS */
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; margin-top: 15px; }
+        .menu-card { background: var(--card); padding: 30px 15px; border: 1px solid var(--border); cursor: pointer; transition: 0.2s; text-align: center; border-left: 4px solid var(--neon); }
+        .menu-card:hover { border-color: var(--neon); background: #111; transform: translateY(-3px); }
+        .menu-card h3 { font-family: 'Orbitron'; color: var(--neon); font-size: 0.9rem; }
+
+        /* CONTROLS */
+        .controls { display: flex; gap: 8px; margin: 15px 0; }
+        .controls input { flex: 1; background: #111; border: 1px solid var(--border); color: #fff; padding: 10px; outline: none; font-size: 0.9rem; }
+        
+        /* LIST ITEMS */
+        .v-item { padding: 20px; border: 1px solid var(--border); margin-bottom: 10px; background: var(--card); display: grid; grid-template-columns: 40px 1fr auto; gap: 15px; align-items: start; }
+        .v-num { color: var(--neon); font-family: 'Orbitron'; font-size: 0.8rem; margin-top: 5px; }
+        .main-def { color: var(--neon); font-weight: 700; margin-top: 3px; display: block; font-size: 1rem; line-height: 1.4; }
+        .sec-mean { font-size: 0.9rem; opacity: 0.7; margin-top: 5px; color: #ddd; }
+        .v-syno { color: var(--succ); font-weight: bold; font-size: 0.9rem; margin-top: 5px; }
+        .v-ex { font-size: 0.85rem; color: #aaa; margin-top: 8px; font-style: italic; padding-left: 10px; border-left: 2px solid var(--neon); }
+
+        /* HOMO GROUP */
+        .homo-sub-item { padding-bottom: 15px; border-bottom: 1px dashed #333; margin-bottom: 15px; }
+        .homo-sub-item:last-child { border-bottom: none; margin-bottom: 0; }
+
+        /* QUIZ */
+        .quiz-box { background: var(--card); padding: 20px; border: 1px solid var(--neon); margin-top: 10px; }
+        .opt-btn { background: #111; border: 1px solid #333; color: #fff; padding: 12px; text-align: left; cursor: pointer; font-size: 0.9rem; display:block; width:100%; margin-bottom:8px; }
+        .opt-btn:hover { border-color: var(--neon); }
+        .opt-btn.selected { background: var(--neon); color: #000; font-weight: bold; }
+        
+        .btn-cyber { background: none; border: 1px solid var(--neon); color: var(--neon); padding: 8px 15px; cursor: pointer; font-family: 'Orbitron'; font-size: 0.7rem; text-transform: uppercase; }
+        .submit-trigger { background: var(--err); color: #fff; border: none; padding: 12px; width: 100%; margin-top: 20px; font-family: 'Orbitron'; cursor: pointer; }
+        .star-btn { background:none; border:none; color:#fff; font-size:1.3rem; cursor:pointer; opacity:0.2; }
+        .star-btn.active { opacity:1; color:var(--neon); }
+        .alpha-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); border: 1px solid var(--border); margin: 10px 0; }
+        .alpha-unit { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 0.5px solid var(--border); font-size: 0.75rem; color: #fff; }
+        .alpha-unit.active { background: var(--neon); color: #000; font-weight: bold; }
+
+        /* ANALYSIS STYLES */
+        .sol-box { background: #000; border: 1px solid #222; padding: 10px; margin-top: 10px; border-left: 3px solid var(--neon); font-size: 0.85rem; }
+        .dist-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.75rem; color: #ccc; }
+        .dist-table td { padding: 6px; border: 1px solid #333; vertical-align: top; }
+        .dist-table b { color: var(--neon); }
+        .hindi-m { color: var(--neon); font-weight: 700; margin-top: 3px; display: block; }
+    </style>
+</head>
+<body>
+
+<header class="cyber-header"><h1>THE SSC SCHOLARS OFFICIAL</h1></header>
+
+<div id="app">
+    <section id="home" class="screen active">
+        <h2 style="font-family:'Orbitron'; color:var(--neon); font-size:0.8rem; margin: 10px 0;">STUDY ZONE</h2>
+        <div class="menu-grid" id="study-menu"></div>
+        <h2 style="font-family:'Orbitron'; color:var(--neon); font-size:0.8rem; margin: 20px 0 10px;">TEST ZONE</h2>
+        <div class="menu-grid" id="quiz-menu"></div>
+        <h2 style="font-family:'Orbitron'; color:var(--neon); font-size:0.8rem; margin: 20px 0 10px;">REVISION</h2>
+        <div class="menu-grid">
+            <div class="menu-card" onclick="ui.view('SAVED')" style="border-left-color: var(--succ);"><h3>SAVED ITEMS ★</h3></div>
+            <div class="menu-card" onclick="ui.view('BLUNDERS')" style="border-left-color: var(--err);"><h3>QUIZ BLUNDERS</h3></div>
+        </div>
+    </section>
+
+    <section id="list-view" class="screen">
+        <button class="btn-cyber" onclick="ui.home()">← BACK</button>
+        <div class="controls">
+            <input type="text" id="search" placeholder="Search..." oninput="ui.filter()">
+            <input type="text" id="range" placeholder="Range (e.g. 1-50)" style="max-width:120px">
+            <button class="btn-cyber" onclick="ui.applyRange()">GO</button>
+        </div>
+        <div id="alpha-bar-list" class="alpha-grid"></div>
+        <div id="list-container"></div>
+    </section>
+
+    <section id="quiz-alpha-sel" class="screen"><button class="btn-cyber" onclick="ui.home()">← BACK</button><div id="quiz-alpha-list" class="alpha-grid"></div></section>
+    <section id="quiz-set-sel" class="screen"><button class="btn-cyber" onclick="quiz.backToAlpha()">← BACK</button><div id="quiz-set-list" class="menu-grid"></div></section>
+    <section id="quiz-run" class="screen">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div id="q-prog" style="font-family:'Orbitron'; color:var(--neon); font-size:0.8rem;">1/25</div>
+            <div id="q-timer" style="color:var(--err); font-family:'Orbitron'; font-weight:bold">10:00</div>
+        </div>
+        <div class="quiz-box" id="q-area"></div>
+        <div style="margin-top:15px; display:flex; justify-content:space-between;">
+            <button class="btn-cyber" onclick="quiz.prev()">PREV</button>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-cyber" onclick="quiz.clear()">CLEAR</button>
+                <button class="btn-cyber" id="main-next-btn" onclick="quiz.next()">NEXT</button>
+            </div>
+        </div>
+        <button class="submit-trigger" onclick="quiz.submit()">FINAL SUBMIT</button>
+    </section>
+    <section id="analysis" class="screen">
+        <div id="score-box" style="text-align:center; padding:15px; border:1px solid var(--neon); background:var(--card); margin-bottom:15px;"></div>
+        <div id="analysis-container"></div>
+        <button class="btn-cyber" style="width:100%; padding:15px;" onclick="ui.home()">BACK TO DASHBOARD</button>
+    </section>
+</div>
+
+<script src="data.js"></script>
+
+<script>
+    const flowCats = ['BEST_OWS', 'BEST_IDIOMS', 'BEST_SYNO', 'SPELL', 'BEST_FIXED'];
+    const bookmarks = JSON.parse(localStorage.getItem('ssc_favs') || '[]');
+    const blunders = JSON.parse(localStorage.getItem('ssc_blunders') || '[]');
+
+    const ui = {
+        state: { cat: null, alpha: null, query: '', range: null },
+        show(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo(0,0); },
+        home() { 
+            quiz.reset(); 
+            this.show('home'); 
+        },
+        
+        initMenus() {
+            const menu = document.getElementById('study-menu');
+            const qMenu = document.getElementById('quiz-menu');
+            menu.innerHTML = ''; qMenu.innerHTML = '';
+            
+            const cats = [
+                {id:'OWS', name:'OWS DICTIONARY'}, {id:'IDIOMS', name:'IDIOMS'}, {id:'SYNO', name:'SYNONYMS'},
+                {id:'PHRASAL', name:'PHRASAL VERBS'}, {id:'FIXED', name:'FIXED PREP'}, {id:'HOMO', name:'HOMONYMS'},
+                {id:'BEST_OWS', name:'BEST 500 OWS', special:true}, {id:'BEST_IDIOMS', name:'BEST 400 IDIOMS', special:true},
+                {id:'BEST_SYNO', name:'BEST SYNO', special:true}, {id:'SPELL', name:'SPELLINGS', special:true}, {id:'BEST_FIXED', name:'BEST FIXED', special:true}
+            ];
+
+            cats.forEach(c => {
+                const style = c.special ? 'border-left-color:#00ccff' : '';
+                menu.innerHTML += `<div class="menu-card" onclick="ui.view('${c.id}')" style="${style}"><h3>${c.name}</h3></div>`;
+                qMenu.innerHTML += `<div class="menu-card" onclick="quiz.init('${c.id}')" style="${style}"><h3>${c.name} TESTS</h3></div>`;
+            });
+        },
+
+        view(cat) {
+            quiz.reset();
+            this.state = { cat, alpha: (flowCats.includes(cat)||cat==='HOMO'||['SAVED','BLUNDERS'].includes(cat))?null:'A', query:'', range:null };
+            document.getElementById('search').value = ''; document.getElementById('range').value = '';
+            this.renderAlphaBar(); this.renderList(); this.show('list-view');
+        },
+
+        renderAlphaBar() {
+            const bar = document.getElementById('alpha-bar-list');
+            if(!this.state.alpha && this.state.cat!=='OWS') { bar.style.display='none'; return; }
+            bar.style.display='grid'; bar.innerHTML = '';
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('').forEach(l => {
+                bar.innerHTML += `<div class="alpha-unit ${this.state.alpha===l?'active':''}" onclick="ui.setAlpha('${l}')">${l}</div>`;
+            });
+        },
+        setAlpha(l) { this.state.alpha=l; this.state.range=null; this.renderAlphaBar(); this.renderList(); },
+        
+        applyRange() {
+            const raw = document.getElementById('range').value.trim();
+            const parts = raw.split(/[-to\s]+/).filter(x => x); 
+            if (parts.length === 2) {
+                const start = parseInt(parts[0]);
+                const end = parseInt(parts[1]);
+                if (!isNaN(start) && !isNaN(end)) {
+                    this.state.range = [start, end]; this.state.alpha = null; this.state.query = ''; 
+                    document.getElementById('search').value = ''; this.renderAlphaBar(); this.renderList();
+                    return;
+                }
+            }
+            alert("Invalid Format! Please enter like: 1-50");
+        },
+
+        filter() { this.state.query = document.getElementById('search').value; this.renderList(); },
+
+        renderList() {
+            const con = document.getElementById('list-container'); con.innerHTML = '';
+            let list = (this.state.cat==='SAVED') ? Object.values(VOCAB_DATA).flat().filter(x=>bookmarks.includes(x.id)) :
+                       (this.state.cat==='BLUNDERS') ? blunders : VOCAB_DATA[this.state.cat];
+            
+            if(this.state.range) list = list.filter(x=>x.num>=this.state.range[0] && x.num<=this.state.range[1]);
+            else if(this.state.alpha) list = list.filter(x=>x.letter===this.state.alpha);
+            if(this.state.query) list = list.filter(x=>x.word.toLowerCase().includes(this.state.query.toLowerCase()));
+
+            if(!list || list.length===0) { con.innerHTML='<div style="text-align:center;padding:20px;color:#666">No Data</div>'; return; }
+
+            if(this.state.cat==='HOMO' && !this.state.query) {
+                const groups = {}; list.forEach(i => { if(!groups[i.groupId]) groups[i.groupId]=[]; groups[i.groupId].push(i); });
+                Object.keys(groups).sort((a,b)=>a-b).forEach(gid => {
+                    let h = `<div class="v-item" style="display:grid;grid-template-columns:30px 1fr;gap:10px;"><div class="v-num">${gid}.</div><div>`;
+                    groups[gid].forEach(i => h += this.itemHtml(i, true));
+                    con.innerHTML += h + '</div></div>';
+                });
+                return;
+            }
+
+            list.forEach(i => con.innerHTML += `<div class="v-item"><div class="v-num">#${i.num}</div><div style="flex:1">${this.itemHtml(i)}</div><button class="star-btn ${bookmarks.includes(i.id)?'active':''}" onclick="ui.fav('${i.id}',this)">★</button></div>`);
+        },
+
+        itemHtml(i, sub=false) {
+            return `<div class="${sub?'homo-sub-item':''}">
+                <b style="color:#fff;font-size:1.1rem">${i.word}</b>
+                <div class="main-def">${i.eng}</div>
+                <div class="sec-mean">${i.hindi}</div>
+                ${i.synos?`<div class="v-syno">Syn: ${i.synos}</div>`:''}
+                ${i.ex?`<div class="v-ex">Ex: ${i.ex}</div>`:''}
+            </div>`;
+        },
+
+        fav(id, btn) {
+            const idx = bookmarks.indexOf(id);
+            if(idx>-1) bookmarks.splice(idx,1); else bookmarks.push(id);
+            localStorage.setItem('ssc_favs', JSON.stringify(bookmarks));
+            btn.classList.toggle('active');
+        }
+    };
+
+    const quiz = {
+        q: [], ans: {}, cat: null, timer: null,
+        
+        reset() { clearInterval(this.timer); }, 
+
+        init(cat) { 
+            this.reset();
+            this.cat=cat; 
+            if(flowCats.includes(cat)||cat==='HOMO') this.sets(null); else this.alpha(); 
+        },
+        
+        alpha() { ui.show('quiz-alpha-sel'); document.getElementById('quiz-alpha-list').innerHTML = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('').map(l=>`<div class="alpha-unit" onclick="quiz.sets('${l}')">${l}</div>`).join(''); },
+        
+        backToAlpha() { 
+            this.reset();
+            if(flowCats.includes(this.cat)||this.cat==='HOMO') ui.home(); else ui.show('quiz-alpha-sel'); 
+        },
+        
+        sets(l) {
+            ui.show('quiz-set-sel'); const list=VOCAB_DATA[this.cat].filter(x=>!l||x.letter===l);
+            const con=document.getElementById('quiz-set-list'); con.innerHTML='';
+            
+            if(list.length === 0) { con.innerHTML = '<div style="padding:20px;text-align:center;color:#666">No questions found for this selection.</div>'; return; }
+
+            for(let i=0; i<list.length; i+=25) {
+                // FIXED: Handle null properly for onclick
+                const lParam = l ? `'${l}'` : 'null';
+                con.innerHTML += `<div class="menu-card" onclick="quiz.start(${i},${i+25},${lParam})"><h3>SET ${(i/25)+1}</h3><p>${i+1}-${Math.min(i+25,list.length)}</p></div>`;
+            }
+        },
+        
+        start(s,e,l) {
+            // FIXED: Treat string 'null' as actual null
+            if(l === 'null') l = null;
+
+            const pool = VOCAB_DATA[this.cat].filter(x => !l || x.letter === l).slice(s,e);
+            
+            if(pool.length === 0) { alert("Error: No questions found."); return; }
+
+            this.q = pool.map(q => {
+                const dist = VOCAB_DATA[this.cat].filter(x=>x.word!==q.word).sort(()=>0.5-Math.random()).slice(0,3);
+                return { ...q, opts: [...dist, q].sort(()=>0.5-Math.random()) };
+            });
+            this.ans={}; this.idx=0; this.timeLeft=600; 
+            ui.show('quiz-run'); this.render(); this.runTimer();
+        },
+        
+        render() {
+            const q = this.q[this.idx];
+            document.getElementById('q-prog').innerText = `${this.idx+1}/${this.q.length}`;
+            document.getElementById('main-next-btn').innerText = (this.idx === this.q.length-1) ? 'FINISH' : 'NEXT';
+            
+            // FIXED: Using data attributes to safely handle special chars in Idioms
+            let h = `<div style="font-size:1.2rem;margin-bottom:15px;color:var(--neon)">${q.word}</div><div class="opt-grid">`;
+            q.opts.forEach(o => {
+                h += `<button class="opt-btn ${this.ans[this.idx]===o.word?'selected':''}" data-val="${o.word.replace(/"/g, '&quot;')}" onclick="quiz.sel(this.getAttribute('data-val'))">${o.eng}</button>`;
+            });
+            document.getElementById('q-area').innerHTML = h + `</div>`;
+        },
+        
+        sel(w) { this.ans[this.idx]=w; this.render(); },
+        clear() { delete this.ans[this.idx]; this.render(); },
+        next() { if(this.idx<this.q.length-1) { this.idx++; this.render(); } },
+        prev() { if(this.idx>0) { this.idx--; this.render(); } },
+        
+        runTimer() {
+            this.reset();
+            this.timer = setInterval(() => {
+                this.timeLeft--;
+                const m=Math.floor(this.timeLeft/60), s=this.timeLeft%60;
+                document.getElementById('q-timer').innerText = `${m}:${s<10?'0':''}${s}`;
+                if(this.timeLeft<=0) this.submit();
+            }, 1000);
+        },
+
+        submit() {
+            if(!confirm("Submit final test?")) return;
+            this.reset(); 
+            ui.show('analysis'); let score=0, h='';
+            
+            this.q.forEach((q,i) => {
+                const u = this.ans[i];
+                const ok = u === q.word; 
+                if(ok) score++;
+                else if(u && !blunders.find(x=>x.id===q.id)) { 
+                    blunders.push(q); 
+                    localStorage.setItem('ssc_blunders', JSON.stringify(blunders)); 
+                }
+
+                let table = `<table class="dist-table"><tr><td colspan="2" style="border-bottom:1px solid var(--neon)"><b>Options Meaning:</b></td></tr>`;
+                q.opts.forEach(opt => {
+                    table += `<tr><td><b style="color:#fff">${opt.word}</b></td><td>${opt.eng}</td></tr>`;
+                });
+                table += `</table>`;
+
+                h += `<div class="v-item" style="display:block; border-left:5px solid ${ok?'var(--succ)':'var(--err)'}">
+                    <div style="display:flex; justify-content:space-between">
+                        <b>${i+1}. ${q.word}</b>
+                        <button class="star-btn ${bookmarks.includes(q.id)?'active':''}" onclick="ui.fav('${q.id}', this)">★</button>
+                    </div>
+                    <div style="font-size:0.8rem; margin:5px 0; color:${ok?'var(--succ)':'var(--err)'}">
+                        ${!u ? 'SKIPPED' : (ok ? 'CORRECT' : 'WRONG CHOICE')}
+                    </div>
+                    <div class="sol-box">
+                        <div class="main-def" style="color:var(--succ)">${q.eng}</div>
+                        <div class="sec-mean">Hindi: ${q.hindi}</div>
+                        ${q.synos ? `<div class="v-syno">Synonyms: ${q.synos}</div>` : ''}
+                        ${q.ex ? `<div class="v-ex">Ex: ${q.ex}</div>` : ''}
+                        ${table}
+                    </div>
+                </div>`;
+            });
+            
+            document.getElementById('score-box').innerHTML = `<h2 style="font-family:'Orbitron'; color:var(--neon)">SCORE: ${score}/${this.q.length}</h2>`;
+            document.getElementById('analysis-container').innerHTML = h;
+        }
+    };
+
+    // INIT APP
+    ui.initMenus();
+</script>
+</body>
+</html>

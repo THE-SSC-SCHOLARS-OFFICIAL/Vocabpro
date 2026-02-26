@@ -55,6 +55,21 @@
         .alpha-unit { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 0.5px solid var(--border); font-size: 0.75rem; color: #fff; }
         .alpha-unit.active { background: var(--neon); color: #000; font-weight: bold; }
 
+        /* REVIEW STYLES */
+        .rev-tab { flex:1; background:none; border:none; border-right:1px solid var(--border); color:#aaa; padding:8px 4px; font-family:'Orbitron'; font-size:0.55rem; cursor:pointer; text-transform:uppercase; }
+        .rev-tab:last-child { border-right:none; }
+        .rev-tab.active { background:var(--neon); color:#000; font-weight:bold; }
+        .q-bubble { width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-family:'Orbitron'; cursor:pointer; border:1px solid #333; color:#aaa; }
+        .q-bubble.correct { background:var(--succ); color:#000; border-color:var(--succ); }
+        .q-bubble.wrong { background:var(--err); color:#fff; border-color:var(--err); }
+        .q-bubble.skipped { background:#333; color:#aaa; border-color:#444; }
+        .q-bubble.current { outline:2px solid var(--neon); outline-offset:2px; }
+        .q-bubble.hidden { display:none; }
+        .review-opt { padding:10px 14px; border:1px solid #333; margin-bottom:7px; font-size:0.88rem; }
+        .review-opt.chosen-wrong { border-color:var(--err); background:#1a0008; color:var(--err); }
+        .review-opt.correct-ans { border-color:var(--succ); background:#001a0a; color:var(--succ); font-weight:bold; }
+        .review-opt.neutral { color:#ccc; }
+
         /* ANALYSIS STYLES */
         .sol-box { background: #000; border: 1px solid #222; padding: 10px; margin-top: 10px; border-left: 3px solid var(--neon); font-size: 0.85rem; }
         .dist-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.75rem; color: #ccc; }
@@ -75,8 +90,8 @@
         <div class="menu-grid" id="quiz-menu"></div>
         <h2 style="font-family:'Orbitron'; color:var(--neon); font-size:0.8rem; margin: 20px 0 10px;">REVISION</h2>
         <div class="menu-grid">
-            <div class="menu-card" onclick="ui.view('SAVED')" style="border-left-color: var(--succ);"><h3>SAVED ITEMS ★</h3></div>
-            <div class="menu-card" onclick="ui.view('BLUNDERS')" style="border-left-color: var(--err);"><h3>QUIZ BLUNDERS</h3></div>
+            <div class="menu-card" onclick="topicUI.open('SAVED')" style="border-left-color: var(--succ);"><h3>SAVED ITEMS ★</h3></div>
+            <div class="menu-card" onclick="topicUI.open('BLUNDERS')" style="border-left-color: var(--err);"><h3>QUIZ BLUNDERS</h3></div>
         </div>
     </section>
 
@@ -109,9 +124,39 @@
         <button class="submit-trigger" onclick="quiz.submit()">FINAL SUBMIT</button>
     </section>
     <section id="analysis" class="screen">
-        <div id="score-box" style="text-align:center; padding:15px; border:1px solid var(--neon); background:var(--card); margin-bottom:15px;"></div>
-        <div id="analysis-container"></div>
-        <button class="btn-cyber" style="width:100%; padding:15px;" onclick="ui.home()">BACK TO DASHBOARD</button>
+        <!-- TOP BAR -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <button class="btn-cyber" onclick="ui.home()">← DASHBOARD</button>
+            <div id="score-box"></div>
+        </div>
+        <!-- FILTER TABS -->
+        <div id="review-tabs" style="display:flex; gap:0; margin-bottom:12px; border:1px solid var(--border); overflow:hidden;"></div>
+        <!-- Q NUMBER GRID -->
+        <div id="review-q-grid" style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:14px;"></div>
+        <!-- SINGLE Q CARD -->
+        <div id="review-card" style="background:var(--card); border:1px solid var(--border); padding:18px;"></div>
+        <!-- NAV BUTTONS -->
+        <div style="display:flex; justify-content:space-between; margin-top:12px;">
+            <button class="btn-cyber" onclick="review.go(-1)">◀ PREV</button>
+            <button class="btn-cyber" onclick="review.go(1)">NEXT ▶</button>
+        </div>
+    </section>
+
+    <!-- TOPIC CARDS SCREEN FOR BLUNDERS / SAVED -->
+    <section id="topic-cards" class="screen">
+        <button class="btn-cyber" onclick="ui.home()">← BACK</button>
+        <h2 id="topic-cards-title" style="font-family:'Orbitron'; color:var(--neon); font-size:0.85rem; margin:15px 0 10px;"></h2>
+        <div class="menu-grid" id="topic-cards-grid"></div>
+    </section>
+
+    <!-- TOPIC FILTERED LIST SCREEN -->
+    <section id="topic-list" class="screen">
+        <div style="display:flex; gap:8px; align-items:center; margin-bottom:10px; flex-wrap:wrap;">
+            <button class="btn-cyber" id="topic-list-back-btn">← BACK</button>
+            <button class="btn-cyber" id="pdf-download-btn" style="border-color:var(--err); color:var(--err); margin-left:auto;">⬇ PDF</button>
+        </div>
+        <h2 id="topic-list-title" style="font-family:'Orbitron'; color:var(--neon); font-size:0.8rem; margin-bottom:12px;"></h2>
+        <div id="topic-list-container"></div>
     </section>
 </div>
 
@@ -302,44 +347,264 @@
 
         submit() {
             if(!confirm("Submit final test?")) return;
-            this.reset(); 
-            ui.show('analysis'); let score=0, h='';
-            
-            this.q.forEach((q,i) => {
+            this.reset();
+
+            let score = 0;
+            this.q.forEach((q, i) => {
                 const u = this.ans[i];
-                const ok = u === q.word; 
+                const ok = u === q.word;
                 if(ok) score++;
-                else if(u && !blunders.find(x=>x.id===q.id)) { 
-                    blunders.push(q); 
-                    localStorage.setItem('ssc_blunders', JSON.stringify(blunders)); 
+                else if(u && !blunders.find(x => x.id === q.id)) {
+                    blunders.push({...q, cat: quiz.cat});
+                    localStorage.setItem('ssc_blunders', JSON.stringify(blunders));
                 }
-
-                let table = `<table class="dist-table"><tr><td colspan="2" style="border-bottom:1px solid var(--neon)"><b>Options Meaning:</b></td></tr>`;
-                q.opts.forEach(opt => {
-                    table += `<tr><td><b style="color:#fff">${opt.word}</b></td><td>${opt.eng}</td></tr>`;
-                });
-                table += `</table>`;
-
-                h += `<div class="v-item" style="display:block; border-left:5px solid ${ok?'var(--succ)':'var(--err)'}">
-                    <div style="display:flex; justify-content:space-between">
-                        <b>${i+1}. ${q.word}</b>
-                        <button class="star-btn ${bookmarks.includes(q.id)?'active':''}" onclick="ui.fav('${q.id}', this)">★</button>
-                    </div>
-                    <div style="font-size:0.8rem; margin:5px 0; color:${ok?'var(--succ)':'var(--err)'}">
-                        ${!u ? 'SKIPPED' : (ok ? 'CORRECT' : 'WRONG CHOICE')}
-                    </div>
-                    <div class="sol-box">
-                        <div class="main-def" style="color:var(--succ)">${q.eng}</div>
-                        <div class="sec-mean">Hindi: ${q.hindi}</div>
-                        ${q.synos ? `<div class="v-syno">Synonyms: ${q.synos}</div>` : ''}
-                        ${q.ex ? `<div class="v-ex">Ex: ${q.ex}</div>` : ''}
-                        ${table}
-                    </div>
-                </div>`;
             });
-            
-            document.getElementById('score-box').innerHTML = `<h2 style="font-family:'Orbitron'; color:var(--neon)">SCORE: ${score}/${this.q.length}</h2>`;
-            document.getElementById('analysis-container').innerHTML = h;
+
+            review.load(this.q, this.ans, score);
+            ui.show('analysis');
+        }
+    };
+
+    // ── REVIEW OBJECT (Testbook/Oliveboard style) ────────────────────────────
+    const review = {
+        qs: [], answers: {}, filter: 'all', idx: 0,
+
+        load(qs, answers, score) {
+            this.qs = qs;
+            this.answers = answers;
+            this.filter = 'all';
+            this.idx = 0;
+
+            const total = qs.length;
+            const wrong = qs.filter((q,i) => answers[i] && answers[i] !== q.word).length;
+            const skipped = qs.filter((q,i) => !answers[i]).length;
+            const correct = total - wrong - skipped;
+
+            document.getElementById('score-box').innerHTML =
+                `<div style="font-family:'Orbitron'; font-size:0.75rem; display:flex; gap:12px; align-items:center;">
+                    <span style="color:var(--neon)">${score}/${total}</span>
+                    <span style="color:var(--succ)">✓${correct}</span>
+                    <span style="color:var(--err)">✗${wrong}</span>
+                    <span style="color:#666">—${skipped}</span>
+                </div>`;
+
+            this.renderTabs(correct, wrong, skipped, total);
+            this.renderGrid();
+            this.renderCard();
+        },
+
+        status(i) {
+            const u = this.answers[i];
+            if (!u) return 'skipped';
+            return u === this.qs[i].word ? 'correct' : 'wrong';
+        },
+
+        filteredIndices() {
+            return this.qs.map((_,i) => i).filter(i => this.filter === 'all' || this.status(i) === this.filter);
+        },
+
+        setFilter(f) {
+            this.filter = f;
+            document.querySelectorAll('.rev-tab').forEach(t => t.classList.toggle('active', t.dataset.filter === f));
+            const fi = this.filteredIndices();
+            this.idx = fi.length ? fi[0] : 0;
+            this.renderGrid();
+            this.renderCard();
+        },
+
+        go(dir) {
+            const fi = this.filteredIndices();
+            const pos = fi.indexOf(this.idx);
+            const next = pos + dir;
+            if (next >= 0 && next < fi.length) { this.idx = fi[next]; this.renderGrid(); this.renderCard(); }
+        },
+
+        jumpTo(i) { this.idx = i; this.renderGrid(); this.renderCard(); },
+
+        renderTabs(correct, wrong, skipped, total) {
+            document.getElementById('review-tabs').innerHTML =
+                `<button class="rev-tab active" data-filter="all" onclick="review.setFilter('all')">ALL ${total}</button>
+                 <button class="rev-tab" data-filter="correct" onclick="review.setFilter('correct')">✓ ${correct}</button>
+                 <button class="rev-tab" data-filter="wrong" onclick="review.setFilter('wrong')">✗ ${wrong}</button>
+                 <button class="rev-tab" data-filter="skipped" onclick="review.setFilter('skipped')">— ${skipped}</button>`;
+        },
+
+        renderGrid() {
+            const fi = new Set(this.filteredIndices());
+            const grid = document.getElementById('review-q-grid');
+            grid.innerHTML = this.qs.map((_, i) => {
+                const st = this.status(i);
+                const hidden = !fi.has(i) ? 'hidden' : '';
+                const cur = i === this.idx ? 'current' : '';
+                return `<div class="q-bubble ${st} ${cur} ${hidden}" onclick="review.jumpTo(${i})">${i+1}</div>`;
+            }).join('');
+        },
+
+        renderCard() {
+            const q = this.qs[this.idx];
+            if (!q) { document.getElementById('review-card').innerHTML = '<div style="color:#666;text-align:center;padding:20px;">No questions in this filter.</div>'; return; }
+
+            const u = this.answers[this.idx];
+            const ok = u === q.word;
+            const st = this.status(this.idx);
+            const stColor = st === 'correct' ? 'var(--succ)' : st === 'wrong' ? 'var(--err)' : '#666';
+            const stLabel = st === 'correct' ? '✓ CORRECT' : st === 'wrong' ? '✗ WRONG' : '— SKIPPED';
+
+            let optsHtml = q.opts.map(o => {
+                let cls = 'neutral';
+                if (o.word === q.word) cls = 'correct-ans';
+                else if (o.word === u) cls = 'chosen-wrong';
+                return `<div class="review-opt ${cls}">${o.eng} <span style="opacity:0.5;font-size:0.75rem">[${o.word}]</span></div>`;
+            }).join('');
+
+            document.getElementById('review-card').innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
+                    <span style="font-family:'Orbitron'; color:#666; font-size:0.7rem;">Q ${this.idx+1} / ${this.qs.length}</span>
+                    <span style="font-family:'Orbitron'; font-size:0.7rem; color:${stColor}; font-weight:bold;">${stLabel}</span>
+                    <button class="star-btn ${bookmarks.includes(q.id)?'active':''}" onclick="ui.fav('${q.id}',this)" style="font-size:1.1rem;">★</button>
+                </div>
+
+                <div style="font-size:1.2rem; font-weight:700; color:var(--neon); margin-bottom:16px; padding:10px; background:#000; border-left:4px solid var(--neon);">
+                    ${q.word}
+                </div>
+
+                <div style="margin-bottom:14px;">${optsHtml}</div>
+
+                <div class="sol-box">
+                    <div style="font-size:0.72rem; font-family:'Orbitron'; color:#666; margin-bottom:8px; letter-spacing:1px;">SOLUTION</div>
+                    <div class="main-def" style="color:var(--succ); font-size:1rem;">${q.eng}</div>
+                    <div class="sec-mean" style="margin-top:5px;">हिंदी: ${q.hindi}</div>
+                    ${q.synos ? `<div class="v-syno" style="margin-top:6px;">Syn: ${q.synos}</div>` : ''}
+                    ${q.ex ? `<div class="v-ex" style="margin-top:8px;">${q.ex}</div>` : ''}
+                    ${u && !ok ? `<div style="margin-top:10px; font-size:0.8rem; color:var(--err);">Your answer: ${u}</div>` : ''}
+                </div>`;
+        }
+    };
+
+    // ── TOPIC CARDS & PDF LOGIC ──────────────────────────────────────────────
+
+    const CAT_NAMES = {
+        OWS: 'OWS DICTIONARY', IDIOMS: 'IDIOMS', SYNO: 'SYNONYMS',
+        PHRASAL: 'PHRASAL VERBS', FIXED: 'FIXED PREP', HOMO: 'HOMONYMS',
+        BEST_OWS: 'BEST 500 OWS', BEST_IDIOMS: 'BEST 400 IDIOMS',
+        BEST_SYNO: 'BEST SYNO', SPELL: 'SPELLINGS', BEST_FIXED: 'BEST FIXED'
+    };
+
+    const topicUI = {
+        mode: null, // 'BLUNDERS' or 'SAVED'
+        currentCat: null,
+
+        open(mode) {
+            this.mode = mode;
+            const isBlunders = mode === 'BLUNDERS';
+            const list = isBlunders ? blunders : Object.values(VOCAB_DATA).flat().filter(x => bookmarks.includes(x.id));
+
+            // Group by cat
+            const groups = {};
+            list.forEach(item => {
+                const c = item.cat || 'OWS';
+                if (!groups[c]) groups[c] = [];
+                groups[c].push(item);
+            });
+
+            document.getElementById('topic-cards-title').textContent = isBlunders ? '⚡ BLUNDERS — SELECT TOPIC' : '★ SAVED — SELECT TOPIC';
+
+            const grid = document.getElementById('topic-cards-grid');
+            grid.innerHTML = '';
+
+            if (Object.keys(groups).length === 0) {
+                grid.innerHTML = `<div style="color:#666; padding:20px; text-align:center; grid-column:1/-1;">No ${mode === 'BLUNDERS' ? 'blunders' : 'saved items'} yet.</div>`;
+            } else {
+                Object.keys(groups).forEach(cat => {
+                    const count = groups[cat].length;
+                    const borderColor = isBlunders ? 'var(--err)' : 'var(--succ)';
+                    grid.innerHTML += `<div class="menu-card" onclick="topicUI.openList('${cat}')" style="border-left-color:${borderColor}">
+                        <h3>${CAT_NAMES[cat] || cat}</h3>
+                        <p style="color:#aaa; margin-top:8px; font-size:0.85rem">${count} item${count>1?'s':''}</p>
+                    </div>`;
+                });
+            }
+
+            ui.show('topic-cards');
+        },
+
+        openList(cat) {
+            this.currentCat = cat;
+            const isBlunders = this.mode === 'BLUNDERS';
+            const allItems = isBlunders ? blunders : Object.values(VOCAB_DATA).flat().filter(x => bookmarks.includes(x.id));
+            const list = allItems.filter(x => (x.cat || 'OWS') === cat);
+
+            const label = `${isBlunders ? 'BLUNDERS' : 'SAVED'} — ${CAT_NAMES[cat] || cat}`;
+            document.getElementById('topic-list-title').textContent = label;
+
+            // Back button
+            document.getElementById('topic-list-back-btn').onclick = () => this.open(this.mode);
+
+            // PDF button
+            document.getElementById('pdf-download-btn').onclick = () => this.downloadPDF(list, label);
+
+            const con = document.getElementById('topic-list-container');
+            con.innerHTML = '';
+
+            if (!list.length) {
+                con.innerHTML = '<div style="text-align:center;padding:20px;color:#666">No items.</div>';
+            } else {
+                list.forEach((i, idx) => {
+                    con.innerHTML += `<div class="v-item">
+                        <div class="v-num">#${idx + 1}</div>
+                        <div style="flex:1">${ui.itemHtml(i)}</div>
+                        <button class="star-btn ${bookmarks.includes(i.id)?'active':''}" onclick="ui.fav('${i.id}',this)">★</button>
+                    </div>`;
+                });
+            }
+
+            ui.show('topic-list');
+        },
+
+        downloadPDF(list, label) {
+            const w = window.open('', '_blank');
+            const rows = list.map((i, idx) => `
+                <div class="item">
+                    <div class="item-num">${idx + 1}.</div>
+                    <div class="item-body">
+                        <div class="word">${i.word}</div>
+                        <div class="eng">${i.eng}</div>
+                        <div class="hindi">${i.hindi}</div>
+                        ${i.synos ? `<div class="synos">Synonyms: ${i.synos}</div>` : ''}
+                        ${i.ex ? `<div class="ex">${i.ex}</div>` : ''}
+                    </div>
+                </div>`).join('');
+
+            w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+            <title>${label}</title>
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600;700&display=swap');
+                * { margin:0; padding:0; box-sizing:border-box; }
+                body { font-family: 'Inter', sans-serif; background:#fff; color:#111; padding:30px; }
+                .pdf-header { border-bottom:3px solid #FFD700; padding-bottom:15px; margin-bottom:25px; }
+                .pdf-header h1 { font-family:'Orbitron'; font-size:1.4rem; color:#333; letter-spacing:2px; }
+                .pdf-header .cat-label { display:inline-block; margin-top:8px; background:#FFD700; color:#000; font-family:'Orbitron'; font-size:0.75rem; padding:4px 12px; font-weight:700; }
+                .pdf-header .meta { margin-top:6px; font-size:0.8rem; color:#666; }
+                .item { display:grid; grid-template-columns:30px 1fr; gap:10px; padding:14px 0; border-bottom:1px solid #eee; page-break-inside:avoid; }
+                .item-num { font-family:'Orbitron'; font-size:0.75rem; color:#FFD700; font-weight:700; padding-top:3px; }
+                .word { font-size:1.05rem; font-weight:700; color:#000; margin-bottom:4px; }
+                .eng { font-size:0.92rem; color:#222; font-weight:600; margin-bottom:3px; }
+                .hindi { font-size:0.85rem; color:#555; }
+                .synos { font-size:0.82rem; color:#27ae60; margin-top:4px; font-weight:600; }
+                .ex { font-size:0.8rem; color:#777; margin-top:5px; font-style:italic; border-left:2px solid #FFD700; padding-left:8px; }
+                .pdf-footer { margin-top:30px; text-align:center; font-size:0.75rem; color:#aaa; font-family:'Orbitron'; border-top:1px solid #eee; padding-top:15px; }
+                @media print { body { padding:15px; } }
+            </style></head><body>
+            <div class="pdf-header">
+                <h1>THE SSC SCHOLARS OFFICIAL</h1>
+                <div class="cat-label">${label}</div>
+                <div class="meta">Total: ${list.length} items &nbsp;|&nbsp; Generated: ${new Date().toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'})}</div>
+            </div>
+            ${rows}
+            <div class="pdf-footer">THE SSC SCHOLARS OFFICIAL</div>
+            <script>window.onload=()=>{window.print();}<\/script>
+            </body></html>`);
+            w.document.close();
         }
     };
 

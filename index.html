@@ -212,10 +212,13 @@
                 {id:'BEST_SYNO', name:'BEST SYNO', special:true}, {id:'SPELL', name:'SPELLINGS', special:true}, {id:'BEST_FIXED', name:'BEST FIXED', special:true}
             ];
 
+            const quizExclude = ['SPELL', 'HOMO'];
             cats.forEach(c => {
                 const style = c.special ? 'border-left-color:#00ccff' : '';
                 menu.innerHTML += `<div class="menu-card" onclick="ui.view('${c.id}')" style="${style}"><h3>${c.name}</h3></div>`;
-                qMenu.innerHTML += `<div class="menu-card" onclick="quiz.init('${c.id}')" style="${style}"><h3>${c.name} TESTS</h3></div>`;
+                if(!quizExclude.includes(c.id)) {
+                    qMenu.innerHTML += `<div class="menu-card" onclick="quiz.init('${c.id}')" style="${style}"><h3>${c.name} TESTS</h3></div>`;
+                }
             });
         },
 

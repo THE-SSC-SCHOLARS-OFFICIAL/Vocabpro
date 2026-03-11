@@ -525,11 +525,11 @@
                 <div style="margin-bottom:14px;">${optsHtml}</div>
 
                 <div class="sol-box">
-                    <div style="font-size:0.72rem; font-family:'Orbitron'; color:#666; margin-bottom:8px; letter-spacing:1px;">SOLUTION</div>
-                    <div class="main-def" style="color:var(--succ); font-size:1rem;">${q.eng}</div>
-                    <div class="sec-mean" style="margin-top:5px;">हिंदी: ${q.hindi}</div>
+                    <div style="font-size:0.72rem; font-family:'Orbitron'; color:#888; margin-bottom:8px; letter-spacing:1px;">SOLUTION</div>
+                    <div style="color:var(--neon); font-weight:700; font-size:1rem; margin-top:3px; line-height:1.4;">${q.eng}</div>
+                    <div style="font-size:0.9rem; color:#fff; margin-top:5px;">हिंदी: ${q.hindi}</div>
                     ${q.synos ? `<div class="v-syno" style="margin-top:6px;">Syn: ${q.synos}</div>` : ''}
-                    ${q.ex ? `<div class="v-ex" style="margin-top:8px;">${q.ex}</div>` : ''}
+                    ${q.ex ? `<div style="font-size:0.85rem; color:#00cc55; margin-top:8px; font-style:italic; padding-left:10px; border-left:2px solid #00cc55;">${q.ex}</div>` : ''}
                     ${u && !ok ? `<div style="margin-top:10px; font-size:0.8rem; color:var(--err);">Your answer: ${u}</div>` : ''}
                 </div>`;
         }

@@ -35,7 +35,7 @@
         .main-def { color: var(--neon); font-weight: 700; margin-top: 3px; display: block; font-size: 1rem; line-height: 1.4; }
         .sec-mean { font-size: 0.9rem; opacity: 0.7; margin-top: 5px; color: #ddd; }
         .v-syno { color: var(--succ); font-weight: bold; font-size: 0.9rem; margin-top: 5px; }
-        .v-ex { font-size: 0.85rem; color: #aaa; margin-top: 8px; font-style: italic; padding-left: 10px; border-left: 2px solid var(--neon); }
+        .v-ex { font-size: 0.85rem; color: var(--succ); margin-top: 8px; font-style: italic; padding-left: 10px; border-left: 2px solid var(--succ); }
 
         /* HOMO GROUP */
         .homo-sub-item { padding-bottom: 15px; border-bottom: 1px dashed #333; margin-bottom: 15px; }
@@ -281,12 +281,17 @@
         },
 
         itemHtml(i, sub=false) {
+            // For HOMO items, eng field contains "English | Hindi | Example" combined — extract only English part
+            let engDisplay = i.eng;
+            if (i.cat === 'HOMO' && i.eng.includes('|')) {
+                engDisplay = i.eng.split('|')[0].trim();
+            }
             return `<div class="${sub?'homo-sub-item':''}">
                 <b style="color:#fff;font-size:1.1rem">${i.word}</b>
-                <div class="main-def">${i.eng}</div>
+                <div class="main-def">${engDisplay}</div>
                 <div class="sec-mean">${i.hindi}</div>
                 ${i.synos?`<div class="v-syno">Syn: ${i.synos}</div>`:''}
-                ${i.ex?`<div class="v-ex">Ex: ${i.ex}</div>`:''}
+                ${i.ex?`<div class="v-ex">${i.ex}</div>`:''}
             </div>`;
         },
 
@@ -640,7 +645,7 @@
                 .eng { font-size:0.92rem; color:#222; font-weight:600; margin-bottom:3px; }
                 .hindi { font-size:0.85rem; color:#555; }
                 .synos { font-size:0.82rem; color:#27ae60; margin-top:4px; font-weight:600; }
-                .ex { font-size:0.8rem; color:#777; margin-top:5px; font-style:italic; border-left:2px solid #FFD700; padding-left:8px; }
+                .ex { font-size:0.8rem; color:#27ae60; margin-top:5px; font-style:italic; border-left:2px solid #27ae60; padding-left:8px; }
                 .pdf-footer { margin-top:30px; text-align:center; font-size:0.75rem; color:#aaa; font-family:'Orbitron'; border-top:1px solid #eee; padding-top:15px; }
                 @media print { body { padding:15px; } }
             </style></head><body>

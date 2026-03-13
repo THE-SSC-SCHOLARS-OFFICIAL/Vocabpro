@@ -361,19 +361,24 @@
             ui.show('quiz-run'); this.render(); this.runTimer();
         },
         
+        isSyno() { return this.cat === 'SYNO' || this.cat === 'BEST_SYNO'; },
+
         render() {
             const q = this.q[this.idx];
             document.getElementById('q-prog').innerText = `${this.idx+1}/${this.q.length}`;
             document.getElementById('main-next-btn').innerText = (this.idx === this.q.length-1) ? 'FINISH' : 'NEXT';
-            
-            // FIXED: Using data attributes to safely handle special chars in Idioms
-            let h = `<div style="font-size:1.2rem;margin-bottom:15px;color:var(--neon)">${q.word}</div><div class="opt-grid">`;
+
+            const syno = this.isSyno();
+            // SYNO: show word → options are other WORDS (not meanings)
+            // OWS:  show word → options are meanings
+            let h = `<div style="font-size:1.2rem;margin-bottom:15px;color:var(--neon);font-weight:700;">${q.word}</div><div class="opt-grid">`;
             q.opts.forEach(o => {
-                h += `<button class="opt-btn ${this.ans[this.idx]===o.word?'selected':''}" data-val="${o.word.replace(/"/g, '&quot;')}" onclick="quiz.sel(this.getAttribute('data-val'))">${o.eng}</button>`;
+                const label = syno ? o.word : o.eng;
+                h += `<button class="opt-btn ${this.ans[this.idx]===o.word?'selected':''}" data-val="${o.word.replace(/"/g,'&quot;')}" onclick="quiz.sel(this.getAttribute('data-val'))">${label}</button>`;
             });
             document.getElementById('q-area').innerHTML = h + `</div>`;
         },
-        
+
         sel(w) { this.ans[this.idx]=w; this.render(); },
         clear() { delete this.ans[this.idx]; this.render(); },
         next() { if(this.idx<this.q.length-1) { this.idx++; this.render(); } },
@@ -506,11 +511,14 @@
             const stColor = st === 'correct' ? 'var(--succ)' : st === 'wrong' ? 'var(--err)' : '#666';
             const stLabel = st === 'correct' ? '✓ CORRECT' : st === 'wrong' ? '✗ WRONG' : '— SKIPPED';
 
+            const isSyno = q.cat === 'SYNO' || q.cat === 'BEST_SYNO';
             let optsHtml = q.opts.map(o => {
                 let cls = 'neutral';
                 if (o.word === q.word) cls = 'correct-ans';
                 else if (o.word === u) cls = 'chosen-wrong';
-                return `<div class="review-opt ${cls}">${o.eng} <span style="color:var(--neon);font-size:0.8rem;font-weight:600;">[${o.word}]</span></div>`;
+                // SYNO: show just the word as option | OWS: show meaning [word]
+                const label = isSyno ? o.word : `${o.eng} <span style="color:var(--neon);font-size:0.8rem;font-weight:600;">[${o.word}]</span>`;
+                return `<div class="review-opt ${cls}">${label}</div>`;
             }).join('');
 
             document.getElementById('review-card').innerHTML = `
@@ -723,3 +731,4 @@
 </script>
 </body>
 </html>
+

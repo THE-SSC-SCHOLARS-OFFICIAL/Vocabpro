@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE SSC SCHOLARS OFFICIAL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --neon: #FFD700; --bg: #050505; --card: #0f0f0f; --fg: #ffffff; --border: rgba(255,215,0,0.2); --err: #ff0033; --succ: #00ff66; --info: #00ccff; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Inter', sans-serif; border-radius:0!important; }
+        body { background:var(--bg); color:var(--fg); overflow-x:hidden; }
+        
+        /* HEADER */
+        .cyber-header { padding: 15px; border-bottom: 2px solid var(--neon); text-align: center; box-shadow: 0 0 15px var(--neon); position: sticky; top:0; z-index:100; background: #000; }
+        .cyber-header h1 { font-family: 'Orbitron'; color: var(--neon); font-size: 1.1rem; text-transform: uppercase; }
+        #app { max-width: 900px; margin: 0 auto; padding: 15px; }
+        
+        /* SCREENS */
+        .screen { display:none; } .active { display:block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+        
+        /* MENUS */
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; margin-top: 15px; }
+        .menu-card { background: var(--card); padding: 30px 15px; border: 1px solid var(--border); cursor: pointer; transition: 0.2s; text-align: center; border-left: 4px solid var(--neon); }
+        .menu-card:hover { border-color: var(--neon); background: #111; transform: translateY(-3px); }
+        .menu-card h3 { font-family: 'Orbitron'; color: var(--neon); font-size: 0.9rem; }
+
+        /* CONTROLS */
+        .controls { display: flex; gap: 8px; margin: 15px 0; }
+        .controls input { flex: 1; background: #111; border: 1px solid var(--border); color: #fff; padding: 10px; outline: none; font-size: 0.9rem; }
+        
+        /* LIST ITEMS */
+        .v-item { padding: 20px; border: 1px solid var(--border); margin-bottom: 10px; background: var(--card); display: grid; grid-template-columns: 40px 1fr auto; gap: 15px; align-items: start; }
+        .v-num { color: var(--neon); font-family: 'Orbitron'; font-size: 0.8rem; margin-top: 5px; }
+        .main-def { color: var(--neon); font-weight: 700; margin-top: 3px; display: block; font-size: 1rem; line-height: 1.4; }
+        .sec-mean { font-size: 0.9rem; opacity: 0.7; margin-top: 5px; color: #ddd; }
+        .v-syno { color: var(--succ); font-weight: bold; font-size: 0.9rem; margin-top: 5px; }
+        .v-ex { font-size: 0.85rem; color: var(--succ); margin-top: 8px; font-style: italic; padding-left: 10px; border-left: 2px solid var(--succ); }
+
+        /* HOMO GROUP */
+        .homo-sub-item { padding-bottom: 15px; border-bottom: 1px dashed #333; margin-bottom: 15px; }
+        .homo-sub-item:last-child { border-bottom: none; margin-bottom: 0; }
+
+        /* QUIZ */
+        .quiz-box { background: var(--card); padding: 20px; border: 1px solid var(--neon); margin-top: 10px; }
+        .opt-btn { background: #111; border: 1px solid #333; color: #fff; padding: 12px; text-align: left; cursor: pointer; font-size: 0.9rem; display:block; width:100%; margin-bottom:8px; }
+        .opt-btn:hover { border-color: var(--neon); }
+        .opt-btn.selected { background: var(--neon); color: #000; font-weight: bold; }
+        
+        .btn-cyber { background: none; border: 1px solid var(--neon); color: var(--neon); padding: 8px 15px; cursor: pointer; font-family: 'Orbitron'; font-size: 0.7rem; text-transform: uppercase; }
+        .submit-trigger { background: var(--err); color: #fff; border: none; padding: 12px; width: 100%; margin-top: 20px; font-family: 'Orbitron'; cursor: pointer; }
+        .star-btn { background:none; border:none; color:#fff; font-size:1.3rem; cursor:pointer; opacity:0.2; }
+        .star-btn.active { opacity:1; color:var(--neon); }
+        .alpha-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); border: 1px solid var(--border); margin: 10px 0; }
+        .alpha-unit { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 0.5px solid var(--border); font-size: 0.75rem; color: #fff; }
+        .alpha-unit.active { background: var(--neon); color: #000; font-weight: bold; }
+
+        /* REVIEW STYLES */
+        .rev-tab { flex:1; background:none; border:none; border-right:1px solid var(--border); color:#aaa; padding:8px 4px; font-family:'Orbitron'; font-size:0.55rem; cursor:pointer; text-transform:uppercase; }
+        .rev-tab:last-child { border-right:none; }
+        .rev-tab.active { background:var(--neon); color:#000; font-weight:bold; }
+        .q-bubble { width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-family:'Orbitron'; cursor:pointer; border:1px solid #333; color:#aaa; }
+        .q-bubble.correct { background:var(--succ); color:#000; border-color:var(--succ); }
+        .q-bubble.wrong { background:var(--err); color:#fff; border-color:var(--err); }
+        .q-bubble.skipped { background:#333; color:#aaa; border-color:#444; }
+        .q-bubble.current { outline:2px solid var(--neon); outline-offset:2px; }
+        .q-bubble.hidden { display:none; }
+        .review-opt { padding:10px 14px; border:1px solid #333; margin-bottom:7px; font-size:0.88rem; }
+        .review-opt.chosen-wrong { border-color:var(--err); background:#1a0008; color:var(--err); }
+        .review-opt.correct-ans { border-color:var(--succ); background:#001a0a; color:var(--succ); font-weight:bold; }
+        .review-opt.neutral { color:#fff; font-weight:700; }
+
+        /* ANALYSIS STYLES */
+        .sol-box { background: #000; border: 1px solid #222; padding: 10px; margin-top: 10px; border-left: 3px solid var(--neon); font-size: 0.85rem; }
+        .dist-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.75rem; color: #ccc; }
+        .dist-table td { padding: 6px; border: 1px solid #333; vertical-align: top; }
+        .dist-table b { color: var(--neon); }
+        .hindi-m { color: var(--neon); font-weight: 700; margin-top: 3px; display: block; }
+
+        /* ATTEMPT MODAL */
+        .att-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.88); z-index:9999; display:flex; align-items:center; justify-content:center; }
+        .att-box { background:#0a0a0a; border:1px solid var(--neon); max-width:400px; width:90%; padding:24px 20px; }
+        .att-box h2 { font-family:'Orbitron'; color:var(--neon); font-size:0.8rem; margin-bottom:16px; letter-spacing:2px; }
+        .att-list { display:flex; flex-direction:column; gap:8px; max-height:250px; overflow-y:auto; margin-bottom:16px; }
+        .att-item { background:#111; border:1px solid #333; padding:12px 14px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; }
+        .att-item:hover { border-color:var(--neon); }
+        .att-item .att-label { font-family:'Orbitron'; font-size:0.7rem; color:var(--neon); }
+        .att-item .att-meta { font-size:0.6rem; color:#555; margin-top:3px; }
+        .att-item .att-score { font-family:'Orbitron'; font-size:0.8rem; color:#fff; text-align:right; }
+        .att-new { display:block; width:100%; padding:12px; background:var(--neon); color:#000; font-family:'Orbitron'; font-size:0.7rem; font-weight:700; cursor:pointer; border:none; letter-spacing:1px; }
+        .att-cancel { display:block; width:100%; padding:10px; background:none; color:#555; font-family:'Orbitron'; font-size:0.65rem; cursor:pointer; border:1px solid #333; margin-top:8px; letter-spacing:1px; }
+    </style>
+</head>
+<body>
+
+<header class="cyber-header"><h1>THE SSC SCHOLARS OFFICIAL</h1></header>
+
+<div id="app">
+    <section id="home" class="screen active">
+        <h2 style="font-family:'Orbitron'; color:var(--neon); font-size:0.8rem; margin: 10px 0;">STUDY ZONE</h2>
+        <div class="menu-grid" id="study-menu"></div>
+        <h2 style="font-family:'Orbitron'; color:var(--neon); font-size:0.8rem; margin: 20px 0 10px;">TEST ZONE</h2>
+        <div class="menu-grid" id="quiz-menu"></div>
+        <h2 style="font-family:'Orbitron'; color:var(--neon); font-size:0.8rem; margin: 20px 0 10px;">REVISION</h2>
+        <div class="menu-grid">
+            <div class="menu-card" onclick="topicUI.open('SAVED')" style="border-left-color: var(--succ);"><h3>SAVED ITEMS ★</h3></div>
+            <div class="menu-card" onclick="topicUI.open('BLUNDERS')" style="border-left-color: var(--err);"><h3>QUIZ BLUNDERS</h3></div>
+        </div>
+    </section>
+
+    <section id="list-view" class="screen">
+        <button class="btn-cyber" onclick="ui.home()">← BACK</button>
+        <div class="controls">
+            <input type="text" id="search" placeholder="Search..." oninput="ui.filter()">
+            <input type="text" id="range" placeholder="Range (e.g. 1-50)" style="max-width:120px">
+            <button class="btn-cyber" onclick="ui.applyRange()">GO</button>
+        </div>
+        <div id="alpha-bar-list" class="alpha-grid"></div>
+        <div id="list-container"></div>
+    </section>
+
+    <section id="quiz-alpha-sel" class="screen"><button class="btn-cyber" onclick="ui.home()">← BACK</button><div id="quiz-alpha-list" class="alpha-grid"></div></section>
+    <section id="quiz-set-sel" class="screen"><button class="btn-cyber" onclick="quiz.backToAlpha()">← BACK</button><div id="quiz-set-list" class="menu-grid"></div></section>
+    <section id="quiz-run" class="screen">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div id="q-prog" style="font-family:'Orbitron'; color:var(--neon); font-size:0.8rem;">1/25</div>
+            <div id="q-timer" style="color:var(--err); font-family:'Orbitron'; font-weight:bold">10:00</div>
+        </div>
+        <div class="quiz-box" id="q-area"></div>
+        <div style="margin-top:15px; display:flex; justify-content:space-between;">
+            <button class="btn-cyber" onclick="quiz.prev()">PREV</button>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-cyber" onclick="quiz.clear()">CLEAR</button>
+                <button class="btn-cyber" id="main-next-btn" onclick="quiz.next()">NEXT</button>
+            </div>
+        </div>
+        <button class="submit-trigger" onclick="quiz.submit()">FINAL SUBMIT</button>
+    </section>
+    <section id="analysis" class="screen">
+        <!-- TOP BAR -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <button class="btn-cyber" onclick="ui.home()">← DASHBOARD</button>
+            <div id="score-box"></div>
+            <button class="btn-cyber" style="border-color:var(--info);color:var(--info);" onclick="quiz.goToSets()">OTHER SETS</button>
+        </div>
+        <!-- FILTER TABS -->
+        <div id="review-tabs" style="display:flex; gap:0; margin-bottom:12px; border:1px solid var(--border); overflow:hidden;"></div>
+        <!-- Q NUMBER GRID -->
+        <div id="review-q-grid" style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:14px;"></div>
+        <!-- SINGLE Q CARD -->
+        <div id="review-card" style="background:var(--card); border:1px solid var(--border); padding:18px;"></div>
+        <!-- NAV BUTTONS -->
+        <div style="display:flex; justify-content:space-between; margin-top:12px;">
+            <button class="btn-cyber" onclick="review.go(-1)">◀ PREV</button>
+            <button class="btn-cyber" onclick="review.go(1)">NEXT ▶</button>
+        </div>
+    </section>
+
+    <!-- TOPIC CARDS SCREEN FOR BLUNDERS / SAVED -->
+    <section id="topic-cards" class="screen">
+        <button class="btn-cyber" onclick="ui.home()">← BACK</button>
+        <h2 id="topic-cards-title" style="font-family:'Orbitron'; color:var(--neon); font-size:0.85rem; margin:15px 0 10px;"></h2>
+        <div class="menu-grid" id="topic-cards-grid"></div>
+    </section>
+
+    <!-- TOPIC FILTERED LIST SCREEN -->
+    <section id="topic-list" class="screen">
+        <div style="display:flex; gap:8px; align-items:center; margin-bottom:10px; flex-wrap:wrap;">
+            <button class="btn-cyber" id="topic-list-back-btn">← BACK</button>
+            <button class="btn-cyber" id="pdf-download-btn" style="border-color:var(--err); color:var(--err); margin-left:auto;">⬇ PDF</button>
+        </div>
+        <h2 id="topic-list-title" style="font-family:'Orbitron'; color:var(--neon); font-size:0.8rem; margin-bottom:12px;"></h2>
+        <div id="topic-list-container"></div>
+    </section>
+</div>
+
+<!-- ATTEMPT MODAL -->
+<div id="att-modal" class="att-overlay" style="display:none;">
+    <div class="att-box">
+        <h2>SELECT ATTEMPT</h2>
+        <div class="att-list" id="att-list"></div>
+        <button class="att-new" onclick="attemptModal.startNew()">+ START NEW ATTEMPT</button>
+        <button class="att-cancel" onclick="attemptModal.close()">CANCEL</button>
+    </div>
+</div>
+
+<script src="data.js"></script>
+
+<script>
+    const flowCats = ['BEST_OWS', 'BEST_IDIOMS', 'BEST_SYNO', 'SPELL', 'BEST_FIXED'];
+    const bookmarks = JSON.parse(localStorage.getItem('ssc_favs') || '[]');
+    const blunders = JSON.parse(localStorage.getItem('ssc_blunders') || '[]');
+    const quizAttempts = JSON.parse(localStorage.getItem('ssc_attempts') || '{}');
+
+    const ui = {
+        state: { cat: null, alpha: null, query: '', range: null },
+        show(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo(0,0); },
+        home() { 
+            quiz.reset(); 
+            this.show('home'); 
+        },
+        
+        initMenus() {
+            const menu = document.getElementById('study-menu');
+            const qMenu = document.getElementById('quiz-menu');
+            menu.innerHTML = ''; qMenu.innerHTML = '';
+            
+            const cats = [
+                {id:'OWS', name:'OWS DICTIONARY'}, {id:'IDIOMS', name:'IDIOMS'}, {id:'SYNO', name:'SYNONYMS'},
+                {id:'PHRASAL', name:'PHRASAL VERBS'}, {id:'FIXED', name:'FIXED PREP'}, {id:'HOMO', name:'HOMONYMS'},
+                {id:'BEST_OWS', name:'BEST 500 OWS', special:true}, {id:'BEST_IDIOMS', name:'BEST 400 IDIOMS', special:true},
+                {id:'BEST_SYNO', name:'BEST SYNO', special:true}, {id:'SPELL', name:'SPELLINGS', special:true}, {id:'BEST_FIXED', name:'BEST FIXED', special:true}
+            ];
+
+            const quizExclude = ['SPELL', 'HOMO'];
+            cats.forEach(c => {
+                const style = c.special ? 'border-left-color:#00ccff' : '';
+                menu.innerHTML += `<div class="menu-card" onclick="ui.view('${c.id}')" style="${style}"><h3>${c.name}</h3></div>`;
+                if(!quizExclude.includes(c.id)) {
+                    qMenu.innerHTML += `<div class="menu-card" onclick="quiz.init('${c.id}')" style="${style}"><h3>${c.name} TESTS</h3></div>`;
+                }
+            });
+        },
+
+        view(cat) {
+            quiz.reset();
+            this.state = { cat, alpha: (flowCats.includes(cat)||cat==='HOMO'||['SAVED','BLUNDERS'].includes(cat))?null:'A', query:'', range:null };
+            document.getElementById('search').value = ''; document.getElementById('range').value = '';
+            this.renderAlphaBar(); this.renderList(); this.show('list-view');
+        },
+
+        renderAlphaBar() {
+            const bar = document.getElementById('alpha-bar-list');
+            if(!this.state.alpha && this.state.cat!=='OWS') { bar.style.display='none'; return; }
+            bar.style.display='grid'; bar.innerHTML = '';
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('').forEach(l => {
+                bar.innerHTML += `<div class="alpha-unit ${this.state.alpha===l?'active':''}" onclick="ui.setAlpha('${l}')">${l}</div>`;
+            });
+        },
+        setAlpha(l) { this.state.alpha=l; this.state.range=null; this.renderAlphaBar(); this.renderList(); },
+        
+        applyRange() {
+            const raw = document.getElementById('range').value.trim();
+            const parts = raw.split(/[-to\s]+/).filter(x => x); 
+            if (parts.length === 2) {
+                const start = parseInt(parts[0]);
+                const end = parseInt(parts[1]);
+                if (!isNaN(start) && !isNaN(end)) {
+                    this.state.range = [start, end]; this.state.alpha = null; this.state.query = ''; 
+                    document.getElementById('search').value = ''; this.renderAlphaBar(); this.renderList();
+                    return;
+                }
+            }
+            alert("Invalid Format! Please enter like: 1-50");
+        },
+
+        filter() { this.state.query = document.getElementById('search').value; this.renderList(); },
+
+        renderList() {
+            const con = document.getElementById('list-container'); con.innerHTML = '';
+            let list = (this.state.cat==='SAVED') ? Object.values(VOCAB_DATA).flat().filter(x=>bookmarks.includes(x.id)) :
+                       (this.state.cat==='BLUNDERS') ? blunders : VOCAB_DATA[this.state.cat];
+            
+            if(this.state.range) list = list.filter(x=>x.num>=this.state.range[0] && x.num<=this.state.range[1]);
+            else if(this.state.alpha) list = list.filter(x=>x.letter===this.state.alpha);
+            if(this.state.query) list = list.filter(x=>x.word.toLowerCase().includes(this.state.query.toLowerCase()));
+
+            if(!list || list.length===0) { con.innerHTML='<div style="text-align:center;padding:20px;color:#666">No Data</div>'; return; }
+
+            if(this.state.cat==='HOMO' && !this.state.query) {
+                const groups = {}; list.forEach(i => { if(!groups[i.groupId]) groups[i.groupId]=[]; groups[i.groupId].push(i); });
+                Object.keys(groups).sort((a,b)=>a-b).forEach(gid => {
+                    let h = `<div class="v-item" style="display:grid;grid-template-columns:30px 1fr;gap:10px;"><div class="v-num">${gid}.</div><div>`;
+                    groups[gid].forEach(i => h += this.itemHtml(i, true));
+                    con.innerHTML += h + '</div></div>';
+                });
+                return;
+            }
+
+            list.forEach(i => con.innerHTML += `<div class="v-item"><div class="v-num">#${i.num}</div><div style="flex:1">${this.itemHtml(i)}</div><button class="star-btn ${bookmarks.includes(i.id)?'active':''}" onclick="ui.fav('${i.id}',this)">★</button></div>`);
+        },
+
+        itemHtml(i, sub=false) {
+            // For HOMO items, eng field contains "English | Hindi | Example" combined — extract only English part
+            let engDisplay = i.eng;
+            if (i.cat === 'HOMO' && i.eng.includes('|')) {
+                engDisplay = i.eng.split('|')[0].trim();
+            }
+            return `<div class="${sub?'homo-sub-item':''}">
+                <b style="color:#fff;font-size:1.1rem">${i.word}</b>
+                <div class="main-def">${engDisplay}</div>
+                <div class="sec-mean">${i.hindi}</div>
+                ${i.synos?`<div class="v-syno">Syn: ${i.synos}</div>`:''}
+                ${i.ex?`<div class="v-ex">${i.ex}</div>`:''}
+            </div>`;
+        },
+
+        fav(id, btn) {
+            const idx = bookmarks.indexOf(id);
+            if(idx>-1) bookmarks.splice(idx,1); else bookmarks.push(id);
+            localStorage.setItem('ssc_favs', JSON.stringify(bookmarks));
+            btn.classList.toggle('active');
+        }
+    };
+
+    const quiz = {
+        q: [], ans: {}, cat: null, timer: null,
+        
+        reset() { clearInterval(this.timer); }, 
+
+        init(cat) { 
+            this.reset();
+            this.cat=cat; 
+            if(flowCats.includes(cat)||cat==='HOMO') this.sets(null); else this.alpha(); 
+        },
+        
+        alpha() { ui.show('quiz-alpha-sel'); document.getElementById('quiz-alpha-list').innerHTML = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('').map(l=>`<div class="alpha-unit" onclick="quiz.sets('${l}')">${l}</div>`).join(''); },
+        
+        backToAlpha() { 
+            this.reset();
+            if(flowCats.includes(this.cat)||this.cat==='HOMO') ui.home(); else ui.show('quiz-alpha-sel'); 
+        },
+
+        goToSets() {
+            this.reset();
+            this.sets(this._alpha || null);
+        },
+        
+        sets(l) {
+            ui.show('quiz-set-sel'); const list=VOCAB_DATA[this.cat].filter(x=>!l||x.letter===l);
+            const con=document.getElementById('quiz-set-list'); con.innerHTML='';
+            
+            if(list.length === 0) { con.innerHTML = '<div style="padding:20px;text-align:center;color:#666">No questions found for this selection.</div>'; return; }
+
+            for(let i=0; i<list.length; i+=25) {
+                const setN = (i/25)+1;
+                const lParam = l ? `'${l}'` : 'null';
+                const attKey = `${this.cat}__${l||'all'}__${setN}`;
+                const attCount = (quizAttempts[attKey] || []).length;
+                const badge = attCount > 0 ? `<p style="color:var(--info);font-size:0.65rem;margin-top:5px;">↺ ${attCount} ATTEMPT${attCount>1?'S':''}</p>` : '';
+                con.innerHTML += `<div class="menu-card" onclick="attemptModal.open(${i},${i+25},${lParam},${setN})"><h3>SET ${setN}</h3><p style="color:#aaa;font-size:0.8rem;margin-top:4px;">${i+1}-${Math.min(i+25,list.length)}</p>${badge}</div>`;
+            }
+        },
+        
+        start(s,e,l,setN) {
+            // FIXED: Treat string 'null' as actual null
+            if(l === 'null') l = null;
+
+            const pool = VOCAB_DATA[this.cat].filter(x => !l || x.letter === l).slice(s,e);
+            
+            if(pool.length === 0) { alert("Error: No questions found."); return; }
+
+            this._attKey = `${this.cat}__${l||'all'}__${setN}`;
+            this._setN = setN;
+            this._alpha = l; // store for "Other Sets" back nav
+            const isSynoCat = this.cat === 'SYNO' || this.cat === 'BEST_SYNO';
+            this.q = pool.map(q => {
+                if (isSynoCat) {
+                    // Correct answer = first synonym from synos field (e.g. "Toil, Drudge" -> "Toil")
+                    const synList = q.synos ? q.synos.split(/[,\/]+/).map(s=>s.trim()).filter(Boolean) : [];
+                    const correctSyno = synList[0] || q.word;
+                    // Distractors = one synonym from 3 other random words that have synos
+                    const distractors = VOCAB_DATA[this.cat]
+                        .filter(x => x.word !== q.word && x.synos)
+                        .sort(() => 0.5 - Math.random())
+                        .slice(0, 3)
+                        .map(x => x.synos.split(/[,\/]+/).map(s=>s.trim()).filter(Boolean)[0])
+                        .filter(Boolean);
+                    const opts = [correctSyno, ...distractors].sort(() => 0.5 - Math.random());
+                    return { ...q, correctSyno, opts };
+                } else {
+                    const dist = VOCAB_DATA[this.cat].filter(x=>x.word!==q.word).sort(()=>0.5-Math.random()).slice(0,3);
+                    return { ...q, opts: [...dist, q].sort(()=>0.5-Math.random()) };
+                }
+            });
+            this.ans={}; this.idx=0; this.timeLeft=600; 
+            ui.show('quiz-run'); this.render(); this.runTimer();
+        },
+        
+        isSyno() { return this.cat === 'SYNO' || this.cat === 'BEST_SYNO'; },
+
+        render() {
+            const q = this.q[this.idx];
+            document.getElementById('q-prog').innerText = `${this.idx+1}/${this.q.length}`;
+            document.getElementById('main-next-btn').innerText = (this.idx === this.q.length-1) ? 'FINISH' : 'NEXT';
+
+            const syno = this.isSyno();
+            let h = `<div style="font-size:1.2rem;margin-bottom:15px;color:var(--neon);font-weight:700;">${q.word}</div><div class="opt-grid">`;
+            if (syno) {
+                // SYNO: opts are plain synonym strings, correct = q.correctSyno
+                q.opts.forEach(o => {
+                    const safeVal = o.replace(/"/g, '&quot;');
+                    h += `<button class="opt-btn ${this.ans[this.idx]===o?'selected':''}" data-val="${safeVal}" onclick="quiz.sel(this.getAttribute('data-val'))">${o}</button>`;
+                });
+            } else {
+                // OWS/others: opts are word objects, correct = q.word
+                q.opts.forEach(o => {
+                    h += `<button class="opt-btn ${this.ans[this.idx]===o.word?'selected':''}" data-val="${o.word.replace(/"/g,'&quot;')}" onclick="quiz.sel(this.getAttribute('data-val'))">${o.eng}</button>`;
+                });
+            }
+            document.getElementById('q-area').innerHTML = h + `</div>`;
+        },
+
+        sel(w) { this.ans[this.idx]=w; this.render(); },
+        clear() { delete this.ans[this.idx]; this.render(); },
+        next() { if(this.idx<this.q.length-1) { this.idx++; this.render(); } },
+        prev() { if(this.idx>0) { this.idx--; this.render(); } },
+        
+        runTimer() {
+            this.reset();
+            this.timer = setInterval(() => {
+                this.timeLeft--;
+                const m=Math.floor(this.timeLeft/60), s=this.timeLeft%60;
+                document.getElementById('q-timer').innerText = `${m}:${s<10?'0':''}${s}`;
+                if(this.timeLeft<=0) this.submit();
+            }, 1000);
+        },
+
+        submit() {
+            if(!confirm("Submit final test?")) return;
+            this.reset();
+
+            const isSynoCat = this.cat === 'SYNO' || this.cat === 'BEST_SYNO';
+            let score = 0;
+            this.q.forEach((q, i) => {
+                const u = this.ans[i];
+                const ok = isSynoCat ? u === q.correctSyno : u === q.word;
+                if(ok) score++;
+                else if(u && !blunders.find(x => x.id === q.id)) {
+                    blunders.push({...q, cat: quiz.cat});
+                    localStorage.setItem('ssc_blunders', JSON.stringify(blunders));
+                }
+            });
+
+            // Save attempt
+            if(this._attKey) {
+                if(!quizAttempts[this._attKey]) quizAttempts[this._attKey] = [];
+                const now = new Date();
+                const dateStr = now.toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true});
+                const savedAns = Object.assign({}, this.ans);
+                // Save the exact question pool (including opts) so review is always accurate
+                const savedQs = this.q.map(q => ({...q, opts: q.opts.map(o => ({...o}))}));
+                quizAttempts[this._attKey].push({ date: dateStr, score, total: this.q.length, ans: savedAns, qs: savedQs });
+                localStorage.setItem('ssc_attempts', JSON.stringify(quizAttempts));
+            }
+
+            review.load(this.q, this.ans, score);
+            ui.show('analysis');
+        }
+    };
+
+    // ── REVIEW OBJECT (Testbook/Oliveboard style) ────────────────────────────
+    const review = {
+        qs: [], answers: {}, filter: 'all', idx: 0,
+
+        load(qs, answers, score) {
+            this.qs = qs;
+            this.answers = answers;
+            this.filter = 'all';
+            this.idx = 0;
+
+            const total = qs.length;
+            const wrong = qs.filter((q,i) => answers[i] && answers[i] !== (q.correctSyno || q.word)).length;
+            const skipped = qs.filter((q,i) => !answers[i]).length;
+            const correct = total - wrong - skipped;
+
+            document.getElementById('score-box').innerHTML =
+                `<div style="font-family:'Orbitron'; font-size:0.75rem; display:flex; gap:12px; align-items:center;">
+                    <span style="color:var(--neon)">${score}/${total}</span>
+                    <span style="color:var(--succ)">✓${correct}</span>
+                    <span style="color:var(--err)">✗${wrong}</span>
+                    <span style="color:#666">—${skipped}</span>
+                </div>`;
+
+            this.renderTabs(correct, wrong, skipped, total);
+            this.renderGrid();
+            this.renderCard();
+        },
+
+        status(i) {
+            const u = this.answers[i];
+            if (!u) return 'skipped';
+            const q = this.qs[i];
+            const correct = (q.cat === 'SYNO' || q.cat === 'BEST_SYNO') ? q.correctSyno : q.word;
+            return u === correct ? 'correct' : 'wrong';
+        },
+
+        filteredIndices() {
+            return this.qs.map((_,i) => i).filter(i => this.filter === 'all' || this.status(i) === this.filter);
+        },
+
+        setFilter(f) {
+            this.filter = f;
+            document.querySelectorAll('.rev-tab').forEach(t => t.classList.toggle('active', t.dataset.filter === f));
+            const fi = this.filteredIndices();
+            this.idx = fi.length ? fi[0] : 0;
+            this.renderGrid();
+            this.renderCard();
+        },
+
+        go(dir) {
+            const fi = this.filteredIndices();
+            const pos = fi.indexOf(this.idx);
+            const next = pos + dir;
+            if (next >= 0 && next < fi.length) { this.idx = fi[next]; this.renderGrid(); this.renderCard(); }
+        },
+
+        jumpTo(i) { this.idx = i; this.renderGrid(); this.renderCard(); },
+
+        renderTabs(correct, wrong, skipped, total) {
+            document.getElementById('review-tabs').innerHTML =
+                `<button class="rev-tab active" data-filter="all" onclick="review.setFilter('all')">ALL ${total}</button>
+                 <button class="rev-tab" data-filter="correct" onclick="review.setFilter('correct')">✓ ${correct}</button>
+                 <button class="rev-tab" data-filter="wrong" onclick="review.setFilter('wrong')">✗ ${wrong}</button>
+                 <button class="rev-tab" data-filter="skipped" onclick="review.setFilter('skipped')">— ${skipped}</button>`;
+        },
+
+        renderGrid() {
+            const fi = new Set(this.filteredIndices());
+            const grid = document.getElementById('review-q-grid');
+            grid.innerHTML = this.qs.map((_, i) => {
+                const st = this.status(i);
+                const hidden = !fi.has(i) ? 'hidden' : '';
+                const cur = i === this.idx ? 'current' : '';
+                return `<div class="q-bubble ${st} ${cur} ${hidden}" onclick="review.jumpTo(${i})">${i+1}</div>`;
+            }).join('');
+        },
+
+        renderCard() {
+            const q = this.qs[this.idx];
+            if (!q) { document.getElementById('review-card').innerHTML = '<div style="color:#666;text-align:center;padding:20px;">No questions in this filter.</div>'; return; }
+
+            const u = this.answers[this.idx];
+            const isSyno = q.cat === 'SYNO' || q.cat === 'BEST_SYNO';
+            const correctAns = isSyno ? q.correctSyno : q.word;
+            const ok = u === correctAns;
+            const st = this.status(this.idx);
+            const stColor = st === 'correct' ? 'var(--succ)' : st === 'wrong' ? 'var(--err)' : '#666';
+            const stLabel = st === 'correct' ? '✓ CORRECT' : st === 'wrong' ? '✗ WRONG' : '— SKIPPED';
+            let optsHtml = isSyno
+                ? q.opts.map(o => {
+                    let cls = 'neutral';
+                    if (o === correctAns) cls = 'correct-ans';
+                    else if (o === u) cls = 'chosen-wrong';
+                    return `<div class="review-opt ${cls}">${o}</div>`;
+                }).join('')
+                : q.opts.map(o => {
+                    let cls = 'neutral';
+                    if (o.word === correctAns) cls = 'correct-ans';
+                    else if (o.word === u) cls = 'chosen-wrong';
+                    return `<div class="review-opt ${cls}">${o.eng} <span style="color:var(--neon);font-size:0.8rem;font-weight:600;">[${o.word}]</span></div>`;
+                }).join('');
+
+            document.getElementById('review-card').innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
+                    <span style="font-family:'Orbitron'; color:#666; font-size:0.7rem;">Q ${this.idx+1} / ${this.qs.length}</span>
+                    <span style="font-family:'Orbitron'; font-size:0.7rem; color:${stColor}; font-weight:bold;">${stLabel}</span>
+                    <button class="star-btn ${bookmarks.includes(q.id)?'active':''}" onclick="ui.fav('${q.id}',this)" style="font-size:1.1rem;">★</button>
+                </div>
+
+                <div style="font-size:1.2rem; font-weight:700; color:var(--neon); margin-bottom:16px; padding:10px; background:#000; border-left:4px solid var(--neon);">
+                    ${q.word}
+                </div>
+
+                <div style="margin-bottom:14px;">${optsHtml}</div>
+
+                <div class="sol-box">
+                    <div style="font-size:0.72rem; font-family:'Orbitron'; color:#888; margin-bottom:8px; letter-spacing:1px;">SOLUTION</div>
+                    <div style="color:var(--neon); font-weight:700; font-size:1rem; margin-top:3px; line-height:1.4;">${q.eng}</div>
+                    <div style="font-size:0.9rem; color:#fff; margin-top:5px;">हिंदी: ${q.hindi}</div>
+                    ${q.synos ? `<div class="v-syno" style="margin-top:6px;">Syn: ${q.synos}</div>` : ''}
+                    ${q.ex ? `<div style="font-size:0.85rem; color:#00cc55; margin-top:8px; font-style:italic; padding-left:10px; border-left:2px solid #00cc55;">${q.ex}</div>` : ''}
+                    ${u && !ok ? `<div style="margin-top:10px; font-size:0.8rem; color:var(--err);">Your answer: ${u}</div>` : ''}
+                </div>`;
+        }
+    };
+
+    // ── TOPIC CARDS & PDF LOGIC ──────────────────────────────────────────────
+
+    const CAT_NAMES = {
+        OWS: 'OWS DICTIONARY', IDIOMS: 'IDIOMS', SYNO: 'SYNONYMS',
+        PHRASAL: 'PHRASAL VERBS', FIXED: 'FIXED PREP', HOMO: 'HOMONYMS',
+        BEST_OWS: 'BEST 500 OWS', BEST_IDIOMS: 'BEST 400 IDIOMS',
+        BEST_SYNO: 'BEST SYNO', SPELL: 'SPELLINGS', BEST_FIXED: 'BEST FIXED'
+    };
+
+    const topicUI = {
+        mode: null, // 'BLUNDERS' or 'SAVED'
+        currentCat: null,
+
+        open(mode) {
+            this.mode = mode;
+            const isBlunders = mode === 'BLUNDERS';
+            const list = isBlunders ? blunders : Object.values(VOCAB_DATA).flat().filter(x => bookmarks.includes(x.id));
+
+            // Group by cat
+            const groups = {};
+            list.forEach(item => {
+                const c = item.cat || 'OWS';
+                if (!groups[c]) groups[c] = [];
+                groups[c].push(item);
+            });
+
+            document.getElementById('topic-cards-title').textContent = isBlunders ? '⚡ BLUNDERS — SELECT TOPIC' : '★ SAVED — SELECT TOPIC';
+
+            const grid = document.getElementById('topic-cards-grid');
+            grid.innerHTML = '';
+
+            if (Object.keys(groups).length === 0) {
+                grid.innerHTML = `<div style="color:#666; padding:20px; text-align:center; grid-column:1/-1;">No ${mode === 'BLUNDERS' ? 'blunders' : 'saved items'} yet.</div>`;
+            } else {
+                Object.keys(groups).forEach(cat => {
+                    const count = groups[cat].length;
+                    const borderColor = isBlunders ? 'var(--err)' : 'var(--succ)';
+                    grid.innerHTML += `<div class="menu-card" onclick="topicUI.openList('${cat}')" style="border-left-color:${borderColor}">
+                        <h3>${CAT_NAMES[cat] || cat}</h3>
+                        <p style="color:#aaa; margin-top:8px; font-size:0.85rem">${count} item${count>1?'s':''}</p>
+                    </div>`;
+                });
+            }
+
+            ui.show('topic-cards');
+        },
+
+        openList(cat) {
+            this.currentCat = cat;
+            const isBlunders = this.mode === 'BLUNDERS';
+            const allItems = isBlunders ? blunders : Object.values(VOCAB_DATA).flat().filter(x => bookmarks.includes(x.id));
+            const list = allItems.filter(x => (x.cat || 'OWS') === cat);
+
+            const label = `${isBlunders ? 'BLUNDERS' : 'SAVED'} — ${CAT_NAMES[cat] || cat}`;
+            document.getElementById('topic-list-title').textContent = label;
+
+            // Back button
+            document.getElementById('topic-list-back-btn').onclick = () => this.open(this.mode);
+
+            // PDF button
+            document.getElementById('pdf-download-btn').onclick = () => this.downloadPDF(list, label);
+
+            const con = document.getElementById('topic-list-container');
+            con.innerHTML = '';
+
+            if (!list.length) {
+                con.innerHTML = '<div style="text-align:center;padding:20px;color:#666">No items.</div>';
+            } else {
+                list.forEach((i, idx) => {
+                    con.innerHTML += `<div class="v-item">
+                        <div class="v-num">#${idx + 1}</div>
+                        <div style="flex:1">${ui.itemHtml(i)}</div>
+                        <button class="star-btn ${bookmarks.includes(i.id)?'active':''}" onclick="ui.fav('${i.id}',this)">★</button>
+                    </div>`;
+                });
+            }
+
+            ui.show('topic-list');
+        },
+
+        downloadPDF(list, label) {
+            const w = window.open('', '_blank');
+            const rows = list.map((i, idx) => `
+                <div class="item">
+                    <div class="item-num">${idx + 1}.</div>
+                    <div class="item-body">
+                        <div class="word">${i.word}</div>
+                        <div class="eng">${i.eng}</div>
+                        <div class="hindi">${i.hindi}</div>
+                        ${i.synos ? `<div class="synos">Synonyms: ${i.synos}</div>` : ''}
+                        ${i.ex ? `<div class="ex">${i.ex}</div>` : ''}
+                    </div>
+                </div>`).join('');
+
+            w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+            <title>${label}</title>
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600;700&display=swap');
+                * { margin:0; padding:0; box-sizing:border-box; }
+                body { font-family: 'Inter', sans-serif; background:#fff; color:#111; padding:30px; }
+                .pdf-header { border-bottom:3px solid #FFD700; padding-bottom:15px; margin-bottom:25px; }
+                .pdf-header h1 { font-family:'Orbitron'; font-size:1.4rem; color:#333; letter-spacing:2px; }
+                .pdf-header .cat-label { display:inline-block; margin-top:8px; background:#FFD700; color:#000; font-family:'Orbitron'; font-size:0.75rem; padding:4px 12px; font-weight:700; }
+                .pdf-header .meta { margin-top:6px; font-size:0.8rem; color:#666; }
+                .item { display:grid; grid-template-columns:30px 1fr; gap:10px; padding:14px 0; border-bottom:1px solid #eee; page-break-inside:avoid; }
+                .item-num { font-family:'Orbitron'; font-size:0.75rem; color:#FFD700; font-weight:700; padding-top:3px; }
+                .word { font-size:1.05rem; font-weight:700; color:#000; margin-bottom:4px; }
+                .eng { font-size:0.92rem; color:#222; font-weight:600; margin-bottom:3px; }
+                .hindi { font-size:0.85rem; color:#555; }
+                .synos { font-size:0.82rem; color:#27ae60; margin-top:4px; font-weight:600; }
+                .ex { font-size:0.8rem; color:#27ae60; margin-top:5px; font-style:italic; border-left:2px solid #27ae60; padding-left:8px; }
+                .pdf-footer { margin-top:30px; text-align:center; font-size:0.75rem; color:#aaa; font-family:'Orbitron'; border-top:1px solid #eee; padding-top:15px; }
+                @media print { body { padding:15px; } }
+            </style></head><body>
+            <div class="pdf-header">
+                <h1>THE SSC SCHOLARS OFFICIAL</h1>
+                <div class="cat-label">${label}</div>
+                <div class="meta">Total: ${list.length} items &nbsp;|&nbsp; Generated: ${new Date().toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'})}</div>
+            </div>
+            ${rows}
+            <div class="pdf-footer">THE SSC SCHOLARS OFFICIAL</div>
+            <script>window.onload=()=>{window.print();}<\/script>
+            </body></html>`);
+            w.document.close();
+        }
+    };
+
+    // ── ATTEMPT MODAL ────────────────────────────────────────────────────────
+    const attemptModal = {
+        _s: null, _e: null, _l: null, _setN: null,
+
+        open(s, e, l, setN) {
+            this._s = s; this._e = e; this._l = l; this._setN = setN;
+            const attKey = `${quiz.cat}__${l||'all'}__${setN}`;
+            const prev = quizAttempts[attKey] || [];
+            if(prev.length === 0) { this.startNew(); return; }
+
+            const listEl = document.getElementById('att-list');
+            listEl.innerHTML = prev.map((att, i) => `
+                <div class="att-item" onclick="attemptModal.reviewOld('${attKey}', ${i})">
+                    <div>
+                        <div class="att-label">ATTEMPT ${i+1}</div>
+                        <div class="att-meta">${att.date}</div>
+                    </div>
+                    <div class="att-score">${att.score}/${att.total}</div>
+                </div>`).join('');
+            document.getElementById('att-modal').style.display = 'flex';
+        },
+
+        close() { document.getElementById('att-modal').style.display = 'none'; },
+
+        startNew() {
+            this.close();
+            quiz.start(this._s, this._e, this._l, this._setN);
+        },
+
+        reviewOld(attKey, idx) {
+            this.close();
+            const att = quizAttempts[attKey][idx];
+
+            let qs;
+            if (att.qs && att.qs.length) {
+                // Use the exact saved question pool (correct fix)
+                qs = att.qs;
+            } else {
+                // Legacy fallback for old attempts (no qs saved) — options may not match exactly
+                const l = this._l === 'null' ? null : this._l;
+                const pool = VOCAB_DATA[quiz.cat].filter(x => !l || x.letter === l).slice(this._s, this._e);
+                qs = pool.map(q => {
+                    const dist = VOCAB_DATA[quiz.cat].filter(x=>x.word!==q.word).sort(()=>0.5-Math.random()).slice(0,3);
+                    return { ...q, opts: [...dist, q].sort(()=>0.5-Math.random()) };
+                });
+            }
+
+            quiz._alpha = (this._l === 'null' ? null : this._l);
+            const correct = qs.filter((q,i) => att.ans[i] === q.word).length;
+            review.load(qs, att.ans, correct);
+            ui.show('analysis');
+        }
+    };
+
+    // INIT APP
+    ui.initMenus();
+</script>
+</body>
+</html>

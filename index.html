@@ -360,13 +360,13 @@
                     const synList = q.synos ? q.synos.split(/[,\/]+/).map(s=>s.trim()).filter(Boolean) : [];
                     const correctSyno = synList[0] || q.word;
                     // Distractors = one synonym from 3 other random words that have synos
-                    const distractors = VOCAB_DATA[this.cat]
+                    const distractorWords = VOCAB_DATA[this.cat]
                         .filter(x => x.word !== q.word && x.synos)
                         .sort(() => 0.5 - Math.random())
                         .slice(0, 3)
-                        .map(x => x.synos.split(/[,\/]+/).map(s=>s.trim()).filter(Boolean)[0])
-                        .filter(Boolean);
-                    const opts = [correctSyno, ...distractors].sort(() => 0.5 - Math.random());
+                        .map(x => ({ word: x.synos.split(/[,\/]+/).map(s=>s.trim()).filter(Boolean)[0], meaning: x.eng }))
+                        .filter(x => x.word);
+                    const opts = [{ word: correctSyno, meaning: q.eng }, ...distractorWords].sort(() => 0.5 - Math.random());
                     return { ...q, correctSyno, opts };
                 } else {
                     const dist = VOCAB_DATA[this.cat].filter(x=>x.word!==q.word).sort(()=>0.5-Math.random()).slice(0,3);
@@ -387,10 +387,10 @@
             const syno = this.isSyno();
             let h = `<div style="font-size:1.2rem;margin-bottom:15px;color:var(--neon);font-weight:700;">${q.word}</div><div class="opt-grid">`;
             if (syno) {
-                // SYNO: opts are plain synonym strings, correct = q.correctSyno
+                // SYNO: opts are {word, meaning} objects, correct = q.correctSyno
                 q.opts.forEach(o => {
-                    const safeVal = o.replace(/"/g, '&quot;');
-                    h += `<button class="opt-btn ${this.ans[this.idx]===o?'selected':''}" data-val="${safeVal}" onclick="quiz.sel(this.getAttribute('data-val'))">${o}</button>`;
+                    const safeVal = o.word.replace(/"/g, '&quot;');
+                    h += `<button class="opt-btn ${this.ans[this.idx]===o.word?'selected':''}" data-val="${safeVal}" onclick="quiz.sel(this.getAttribute('data-val'))">${o.word}</button>`;
                 });
             } else {
                 // OWS/others: opts are word objects, correct = q.word
@@ -540,12 +540,9 @@
             let optsHtml = isSyno
                 ? q.opts.map(o => {
                     let cls = 'neutral';
-                    if (o === correctAns) cls = 'correct-ans';
-                    else if (o === u) cls = 'chosen-wrong';
-                    // Find meaning of this synonym word from VOCAB_DATA
-                    const synWordObj = Object.values(VOCAB_DATA).flat().find(x => x.word.toLowerCase() === o.toLowerCase());
-                    const synMeaning = synWordObj ? synWordObj.eng : '';
-                    return `<div class="review-opt ${cls}">${o}${synMeaning ? ` <span style="color:var(--neon);font-size:0.8rem;font-weight:600;">[${synMeaning}]</span>` : ''}</div>`;
+                    if (o.word === correctAns) cls = 'correct-ans';
+                    else if (o.word === u) cls = 'chosen-wrong';
+                    return `<div class="review-opt ${cls}">${o.word} <span style="color:var(--neon);font-size:0.8rem;font-weight:600;">[${o.meaning}]</span></div>`;
                 }).join('')
                 : q.opts.map(o => {
                     let cls = 'neutral';

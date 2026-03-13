@@ -542,7 +542,10 @@
                     let cls = 'neutral';
                     if (o === correctAns) cls = 'correct-ans';
                     else if (o === u) cls = 'chosen-wrong';
-                    return `<div class="review-opt ${cls}">${o}</div>`;
+                    // Find meaning of this synonym word from VOCAB_DATA
+                    const synWordObj = Object.values(VOCAB_DATA).flat().find(x => x.word.toLowerCase() === o.toLowerCase());
+                    const synMeaning = synWordObj ? synWordObj.eng : '';
+                    return `<div class="review-opt ${cls}">${o}${synMeaning ? ` <span style="color:var(--neon);font-size:0.8rem;font-weight:600;">[${synMeaning}]</span>` : ''}</div>`;
                 }).join('')
                 : q.opts.map(o => {
                     let cls = 'neutral';

@@ -410,7 +410,9 @@
                 const now = new Date();
                 const dateStr = now.toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true});
                 const savedAns = Object.assign({}, this.ans);
-                quizAttempts[this._attKey].push({ date: dateStr, score, total: this.q.length, ans: savedAns });
+                // Save the exact question pool (including opts) so review is always accurate
+                const savedQs = this.q.map(q => ({...q, opts: q.opts.map(o => ({...o}))}));
+                quizAttempts[this._attKey].push({ date: dateStr, score, total: this.q.length, ans: savedAns, qs: savedQs });
                 localStorage.setItem('ssc_attempts', JSON.stringify(quizAttempts));
             }
 
@@ -694,14 +696,22 @@
         reviewOld(attKey, idx) {
             this.close();
             const att = quizAttempts[attKey][idx];
-            // Rebuild quiz question pool from the saved attempt (same set)
-            const l = this._l === 'null' ? null : this._l;
-            const pool = VOCAB_DATA[quiz.cat].filter(x => !l || x.letter === l).slice(this._s, this._e);
-            const qs = pool.map(q => {
-                const dist = VOCAB_DATA[quiz.cat].filter(x=>x.word!==q.word).sort(()=>0.5-Math.random()).slice(0,3);
-                return { ...q, opts: [...dist, q].sort(()=>0.5-Math.random()) };
-            });
-            quiz._alpha = l;  // so OTHER SETS works
+
+            let qs;
+            if (att.qs && att.qs.length) {
+                // Use the exact saved question pool (correct fix)
+                qs = att.qs;
+            } else {
+                // Legacy fallback for old attempts (no qs saved) — options may not match exactly
+                const l = this._l === 'null' ? null : this._l;
+                const pool = VOCAB_DATA[quiz.cat].filter(x => !l || x.letter === l).slice(this._s, this._e);
+                qs = pool.map(q => {
+                    const dist = VOCAB_DATA[quiz.cat].filter(x=>x.word!==q.word).sort(()=>0.5-Math.random()).slice(0,3);
+                    return { ...q, opts: [...dist, q].sort(()=>0.5-Math.random()) };
+                });
+            }
+
+            quiz._alpha = (this._l === 'null' ? null : this._l);
             const correct = qs.filter((q,i) => att.ans[i] === q.word).length;
             review.load(qs, att.ans, correct);
             ui.show('analysis');
